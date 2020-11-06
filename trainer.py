@@ -232,7 +232,8 @@ class Trainer(object):
             meters['step'].update(time.time() - end)
             end = time.time()
 
-            if i % self.print_freq == 0 or i == len(data_loader) - 1:
+            if False:
+            #if i % self.print_freq == 0 or i == len(data_loader) - 1:
                 report = str('{phase} - Epoch: [{0}][{1}/{2}]\t'
                              'Time {meters[step].val:.3f} ({meters[step].avg:.3f})\t'
                              'Data {meters[data].val:.3f} ({meters[data].avg:.3f})\t'
