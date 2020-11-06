@@ -297,6 +297,7 @@ def main_worker(args):
     args.start_epoch = max(args.start_epoch, 0)
     trainer.training_steps = args.start_epoch * len(train_data)
     for epoch in range(args.start_epoch, args.epochs):
+        clock_st = time.process_time()
         trainer.epoch = epoch
         train_data.set_epoch(epoch)
         val_data.set_epoch(epoch)
@@ -311,6 +312,8 @@ def main_worker(args):
 
         if args.distributed and args.local_rank > 0:
             continue
+        clock_ed = time.process_time()
+        clock_elapsed = clock_ed - clock_st
 
         # remember best prec@1 and save checkpoint
         is_best = val_results['prec1'] > best_prec1
@@ -336,12 +339,14 @@ def main_worker(args):
                      'Training Prec@5 {train[prec5]:.3f} \t'
                      'Validation Loss {val[loss]:.4f} \t'
                      'Validation Prec@1 {val[prec1]:.3f} \t'
-                     'Validation Prec@5 {val[prec5]:.3f} \t\n'
-                     .format(epoch + 1, train=train_results, val=val_results))
+                     'Validation Prec@5 {val[prec5]:.3f} \t'
+                     'Elapsed Time {1:.3f}\n'
+                     .format(epoch + 1, clock_elapsed, train=train_results, val=val_results))
 
         values = dict(epoch=epoch + 1, steps=trainer.training_steps)
         values.update({'training ' + k: v for k, v in train_results.items()})
         values.update({'validation ' + k: v for k, v in val_results.items()})
+        values.update({'elapsed time':clock_elapsed})
         results.add(**values)
 
         results.plot(x='epoch', y=['training loss', 'validation loss'],
